@@ -264,12 +264,13 @@ public class NumericParameter extends NumericShape{
     public void fillInDrawShape(double resolution) {
         this.resolution = (int)((upperBound - lowerBound) / resolution);
         ArrayList<Point> tempPoints = new ArrayList<Point>();
-        double xValue = lowerBound;
-        double endXValue = upperBound;
-        Point begPoint = new Point(xValue, calculateYValue(xValue));
-        Point endPoint = new Point(endXValue, calculateYValue(endXValue));
-        tempPoints = fillInWrapper(begPoint, endPoint, resolution);
-        
+        for (int i = 0; i < points.length - 1; i++){
+            ArrayList<Point> veryTempPoints = new ArrayList<Point>();
+            veryTempPoints = fillInWrapper(points[i], points[i + 1], resolution);
+            for (int j = 0; j < veryTempPoints.size(); j++){
+                tempPoints.add(veryTempPoints.get(j));
+            }
+        }
         convertToArrayAndSet(tempPoints);
        
     }
