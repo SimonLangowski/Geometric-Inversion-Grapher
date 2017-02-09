@@ -140,12 +140,15 @@ public class GraphingProgram{
                 NumericParameter function = new NumericParameter(equation, "x", lowerBound, upperBound, 0.001);
                 function.setColor(getNextColor(itemNumber));
                 function.setName("Function " + itemNumber);
-                System.out.println("initial creation successful");
-                //polynomial.fillInDrawShape(0.001);
-                g.addShape(function);
-                itemNumber++;
-                sendMessage(t, "Function creation successful");
-                sendMessage(t, "Use F to fill in polynomial.  WARNING, this make take a very long time depending on the size");
+                if (function.getErrorMessage().equals("")){
+                    g.addShape(function);
+                    itemNumber++;
+                    sendMessage(t, "Function creation successful");
+                    sendMessage(t, "Use F to fill in polynomial.  WARNING, this make take a very long time depending on the size");
+                } else {
+                    String errorMessage = function.getErrorMessage();
+                    sendMessage(t, "Function creation failed: " + errorMessage);
+                }     
             } else if (message.equalsIgnoreCase("g")){
                 String[] manifest = g.getManifest();
                 if (manifest.length < 2)

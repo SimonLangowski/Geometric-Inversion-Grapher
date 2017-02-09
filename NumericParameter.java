@@ -22,6 +22,7 @@ public class NumericParameter extends NumericShape{
     private Point[] points;
     private int numPoints;
     private Color color;
+    private String errorMessage;
     
     public NumericParameter(String equation, String parameter, double lowerBound,
             double upperBound, double resolution){
@@ -31,6 +32,7 @@ public class NumericParameter extends NumericShape{
         this.lowerBound = lowerBound;
         this.numPoints = (int)((upperBound - lowerBound) / resolution);
         this.color = Color.black;
+        this.errorMessage = "";
         redrawShape(resolution);
     }
     
@@ -44,6 +46,7 @@ public class NumericParameter extends NumericShape{
     public double calculateEquationValueWrapper(double xValue){
         //validate initialization
         if (equation == null || parameter == null){
+            errorMessage = "Empty equation";
             System.out.println("initialize numeric parameter");
             return 0;
         }
@@ -53,7 +56,10 @@ public class NumericParameter extends NumericShape{
         String past = "";
         for (int i = 0; i < equation.length(); i++){
             String current = equation.substring(i, i + 1);
-            if (current.equals(" ") && !(past.equals(""))){
+            /*debugging
+            System.out.println("Current: " + current + "\nPast: " + past);
+            */
+            if (current.equals(" ") && !(past.trim().equals(""))){
                 eqList.add(past);
                 past = "";
                 continue;
@@ -73,7 +79,8 @@ public class NumericParameter extends NumericShape{
                     past = "";
                 }
             } else if (current.equals(")")) {
-                eqList.add(past);
+                if (!(past.trim().equals("")))
+                    eqList.add(past);
                 eqList.add(")");
                 past = "";
             } else {
@@ -87,6 +94,7 @@ public class NumericParameter extends NumericShape{
         //substitute parameter values
         int numTerms = eq2.length;
         for (int i = 0; i < numTerms; i++){
+            System.out.print(eq2[i] + ", ");
             if (eq2[i].equalsIgnoreCase(parameter)){
                 eq2[i] = Double.toString(xValue);
             }
@@ -102,6 +110,7 @@ public class NumericParameter extends NumericShape{
                 numRightParenthesis++;
         }
         if (numLeftParenthesis != numRightParenthesis){
+            errorMessage = "Mismatched parenthesis";
             System.out.println("Mistmatched parenthesis");
             return 0;
         }
@@ -121,7 +130,8 @@ public class NumericParameter extends NumericShape{
                 }
             }
             if (!(valid)){
-                System.out.println("Invalid syntax");
+                errorMessage = "Invalid syntax: " + eq2[i];
+                System.out.println("Invalid syntax: " + eq2[i]);
                 return 0;
             }
         }
@@ -161,6 +171,7 @@ public class NumericParameter extends NumericShape{
                 String[] remainingEquation = createNew(eq, 2, eq.length);
                 return Math.pow(Double.parseDouble(eq[0]), calculateEquationValue(remainingEquation));
             } else {
+                errorMessage = "Programming error: please report";
                 System.out.println("Programming error");
                 return 0;
             }
@@ -173,6 +184,7 @@ public class NumericParameter extends NumericShape{
         } else if (eq[0].equals("(")) {
             int rightIndex = findRightParenthesis(eq);
             if(rightIndex == -1){
+                errorMessage = ("Pight parenthesis incorrectly ordered");
                 System.out.println("Right parenthesis method finding error");
                 return 0;
             }
@@ -184,6 +196,7 @@ public class NumericParameter extends NumericShape{
             }
             return calculateEquationValue(remainingEquation);
         } else {
+            errorMessage = "Programming error: please report";
             System.out.println("Programming error");
             return 0;    
         }   
@@ -200,9 +213,16 @@ public class NumericParameter extends NumericShape{
     
     public int findRightParenthesis(String[] strs){
         //to find corresponding parenthesis, work in reverse
-        for (int i = 0; i < strs.length; i++)
-            if (strs[i].equals(")"))
+        int numParenthesis = 0;
+        for (int i = 0; i < strs.length; i++){
+            if (strs[i].equals("(")){
+                numParenthesis++;
+            } else if ((strs[i].equals(")")) && (numParenthesis == 1)) {
                 return i;
+            } else if ((strs[i].equals(")"))){
+                numParenthesis--;
+            }
+        }
         return -1;
     }
     
@@ -229,7 +249,8 @@ public class NumericParameter extends NumericShape{
         double xValue = lowerBound;
         double endXValue = upperBound;
         while (xValue <= endXValue){
-            //top half of circle
+            if (!(errorMessage.equals("")))
+                break;
             double yValue = calculateYValue(xValue);
             tempPoints.add(new Point(xValue, yValue));
             xValue = xValue + resolution;
@@ -320,6 +341,13 @@ public class NumericParameter extends NumericShape{
         return name;
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
    
 
     public Color getColor() {
