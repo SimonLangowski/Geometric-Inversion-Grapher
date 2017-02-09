@@ -133,7 +133,12 @@ public class GraphingProgram{
             } else if (message.equalsIgnoreCase("f")){
                 sendMessage(t, "Enter your function in the form: \"3 * (x ^ 2)\" or \"cos(x ^ 3)\" or \"(-0.5 * (x ^ 2)) + 2\"");
                 sendMessage(t, "Warning: does not follow order of operations, use parenthesis as necessary");
-                String equation = getMessage(t);
+                String equation;
+                while (true){
+                    equation = getMessage(t);
+                    if (!(equation.trim() == ""))
+                        break;
+                }
                 sendMessage(t, "If you are going to fill your shape, choose small bounds so that y values are within screen");
                 sendMessage(t, "Enter the lower bound");
                 double lowerBound = getDoubleMessage(t);
@@ -191,6 +196,8 @@ public class GraphingProgram{
                                     }
                                     if (strings.size() > 1000)
                                         sendMessage(t, "Warning more than 1000 intersections");
+                                    else if (strings.size() == 0)
+                                        sendMessage(t, "No intersections found");
                                     else
                                         for (String s: strings)
                                             sendMessage(t, s);
