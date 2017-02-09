@@ -21,6 +21,7 @@ import javax.swing.JFrame;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JPanel;
@@ -76,7 +77,7 @@ public class GraphingProgram{
         itemNumber = 1;
         initializeColors();
         String instructions1 = "Create new shape: C - Circle. E - Ellipse. F - Function";
-        String instructions2 = "Operations: G - Geometric invert. R - Remove Shape";
+        String instructions2 = "Operations: G - Geometric invert. R - Remove Shape. I - Estimate intersections";
         String instructions3 = "View: S - Change scale.  D - Change fill level. T - Translate center.";
         String instructions4 = "L - List shapes.  Q - Quit";
         while(true) {
@@ -130,13 +131,15 @@ public class GraphingProgram{
                 itemNumber++;
                 sendMessage(t, "Ellipse successfully created");
             } else if (message.equalsIgnoreCase("f")){
-                sendMessage(t, "Enter your function in the form: \"3 * (x ^ 2)\" or \"cos(x ^ 3)\"");
+                sendMessage(t, "Enter your function in the form: \"3 * (x ^ 2)\" or \"cos(x ^ 3)\" or \"(-0.5 * (x ^ 2)) + 2\"");
+                sendMessage(t, "Warning: does not follow order of operations, use parenthesis as necessary");
                 String equation = getMessage(t);
                 sendMessage(t, "If you are going to fill your shape, choose small bounds so that y values are within screen");
                 sendMessage(t, "Enter the lower bound");
                 double lowerBound = getDoubleMessage(t);
                 sendMessage(t, "Enter the upper bound");
                 double upperBound = getDoubleMessage(t);
+                sendMessage(t, "Please wait");
                 NumericParameter function = new NumericParameter(equation, "x", lowerBound, upperBound, 0.001);
                 function.setColor(getNextColor(itemNumber));
                 function.setName("Function " + itemNumber);
@@ -148,7 +151,56 @@ public class GraphingProgram{
                 } else {
                     String errorMessage = function.getErrorMessage();
                     sendMessage(t, "Function creation failed: " + errorMessage);
-                }     
+                }
+            } else if (message.equalsIgnoreCase("i")){
+                String[] manifest = g.getManifest();
+                if (manifest.length < 2)
+                    sendMessage(t, "Not enough shapes");
+                else {
+                    sendMessage(t, "Select two shapes to find intersections for (-1 to quit)");
+                    for (int i = 0; i < manifest.length; i++){
+                        String name = "" + (i + 1) + ": " + manifest[i];
+                        sendMessage(t, name);
+                    }
+                    while (true){
+                        int choice1 = getIntegerMessage(t);
+                        if (choice1 <= 0) {
+                            break;
+                        } else if (choice1 > manifest.length) {
+                            sendMessage(t, "Select a valid shape");
+                        } else {
+                            sendMessage(t, "Select the second shape (-1 to quit)");
+                            while (true){
+                                int choice2 = getIntegerMessage(t);
+                                if (choice2 <= 0) {
+                                    break;
+                                } else if (choice2 > manifest.length) {
+                                    sendMessage(t, "Select a valid shape");
+                                } else {
+                                    ArrayList<Point> result = new ArrayList<Point>();
+                                    result = g.getShape(choice1 - 1).numericIntersects(g.getShape(choice2 - 1));
+                                    ArrayList<String> strings = new ArrayList<String>();
+                                    for (Point p : result){
+                                        boolean alreadyFound = false;
+                                        for (String s : strings){
+                                            if (p.toString().equals(s))
+                                                alreadyFound = true;
+                                        }
+                                        if (!alreadyFound)
+                                            strings.add(p.toString());
+                                    }
+                                    if (strings.size() > 1000)
+                                        sendMessage(t, "Warning more than 1000 intersections");
+                                    else
+                                        for (String s: strings)
+                                            sendMessage(t, s);
+                                    break;
+                                }
+                            }
+                            break;
+                        }         
+                    }
+                }
             } else if (message.equalsIgnoreCase("g")){
                 String[] manifest = g.getManifest();
                 if (manifest.length < 2)
@@ -210,6 +262,7 @@ public class GraphingProgram{
                 sendMessage(t, "Recommended fill level: 0.01 for solid, 0.001 if planning to invert");
                 sendMessage(t, "How accurate?");
                 double resolution = getDoubleMessage(t);
+                sendMessage(t, "Working...");
                 for (int i = 0; i < g.getLength(); i++){
                     g.getShape(i).fillInDrawShape(resolution);
                 }
