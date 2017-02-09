@@ -94,7 +94,7 @@ public class NumericParameter extends NumericShape{
         //substitute parameter values
         int numTerms = eq2.length;
         for (int i = 0; i < numTerms; i++){
-            System.out.print(eq2[i] + ", ");
+            //System.out.print(eq2[i] + ", ");
             if (eq2[i].equalsIgnoreCase(parameter)){
                 eq2[i] = Double.toString(xValue);
             }
