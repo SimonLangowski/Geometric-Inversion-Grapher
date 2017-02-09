@@ -60,7 +60,9 @@ public class Point {
     
     @Override
     public String toString(){
-        return ("(" + this.x + ", " + this.y + ")");
+        String str = String.format("(%.4f, %.4f)", this.x, this.y);
+        return str;
+        //return ("(" + this.x + ", " + this.y + ")");
     }
     
     
