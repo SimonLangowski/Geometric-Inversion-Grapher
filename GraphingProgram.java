@@ -76,7 +76,7 @@ public class GraphingProgram{
     public void loop(TextListener t, Grapher g){
         itemNumber = 1;
         initializeColors();
-        String instructions1 = "Create new shape: C - Circle. E - Ellipse. F - Function";
+        String instructions1 = "Create new shape: C - Circle. E - Ellipse. F - Function. P - parameter";
         String instructions2 = "Operations: G - Geometric invert. R - Remove Shape. I - Estimate intersections";
         String instructions3 = "View: S - Change scale.  D - Change fill level. T - Translate center.";
         String instructions4 = "L - List shapes.  Q - Quit";
@@ -155,6 +155,41 @@ public class GraphingProgram{
                     sendMessage(t, "Use F to fill in polynomial.  WARNING, this make take a very long time depending on the size");
                 } else {
                     String errorMessage = function.getErrorMessage();
+                    sendMessage(t, "Function creation failed: " + errorMessage);
+                }
+            } else if (message.equalsIgnoreCase("p")){
+                sendMessage(t, "Enter your X parameterization in the form: \"3 * (t ^ 2)\" or \"cos(t ^ 3)\" or \"(-0.5 * (t ^ 2)) + 2\"");
+                sendMessage(t, "Warning: does not follow order of operations, use parenthesis as necessary");
+                String equationX;
+                while (true){
+                    equationX = getMessage(t);
+                    if (!(equationX.trim() == ""))
+                        break;
+                }
+                sendMessage(t, "Enter your Y parameterization in the form: \"3 * (t ^ 2)\" or \"cos(t ^ 3)\" or \"(-0.5 * (t ^ 2)) + 2\"");
+                sendMessage(t, "Warning: does not follow order of operations, use parenthesis as necessary");
+                String equationY;
+                while (true){
+                    equationY = getMessage(t);
+                    if (!(equationY.trim() == ""))
+                        break;
+                }
+                sendMessage(t, "If you are going to fill your shape, choose small bounds so that values are within screen");
+                sendMessage(t, "Enter the lower bound for t");
+                double lowerBound = getDoubleMessage(t);
+                sendMessage(t, "Enter the upper boundfor t");
+                double upperBound = getDoubleMessage(t);
+                sendMessage(t, "Please wait");
+                NumericParameter2D parameterization = new NumericParameter2D(equationX, equationY, "t", lowerBound, upperBound, 0.001);
+                parameterization.setColor(getNextColor(itemNumber));
+                parameterization.setName("Function " + itemNumber);
+                if (parameterization.getErrorMessage().equals("")){
+                    g.addShape(parameterization);
+                    itemNumber++;
+                    sendMessage(t, "Function creation successful");
+                    sendMessage(t, "Use F to fill in polynomial.  WARNING, this make take a very long time depending on the size");
+                } else {
+                    String errorMessage = parameterization.getErrorMessage();
                     sendMessage(t, "Function creation failed: " + errorMessage);
                 }
             } else if (message.equalsIgnoreCase("i")){
