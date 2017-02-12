@@ -4,6 +4,7 @@ package graphingprogram;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * This class is meant to contain inverted shapes as point arrays, for which equations cannot be calculated.
@@ -47,7 +48,25 @@ public class NumericPoints extends NumericShape{
         //get points in sorted order
         //find which points x value lies between
         //give a weighted average of those points y values
-        return 0;
+        //only works for functions
+        this.numPoints = points.length;
+        double[] xVals = new double[numPoints];
+        for (int i = 0; i < numPoints; i++){
+            xVals[i] = points[i].getX();
+        }
+        Arrays.sort(xVals);
+        int index = 0;
+        while (xValue > xVals[index]){
+            index++;
+        }
+        if (index == 0 || index == xVals.length){
+            System.out.println("undefined");
+            return 0;
+        }
+        double rightValue = xVals[index];
+        double leftValue = xVals[index - 1];
+        double rightWeight = (rightValue - xValue) / (rightValue - leftValue);
+        return ((1 - rightWeight) * points[index - 1].getY()) + (rightWeight * points[index].getY());
     }
 
     
